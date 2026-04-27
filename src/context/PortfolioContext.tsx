@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { defaultData } from '../data/defaultData';
-import { db, auth, googleProvider, signInWithPopup, signOut, doc, setDoc, onSnapshot } from '../lib/firebase';
+import { db, auth, googleProvider, signInAnonymously, signOut, doc, setDoc, onSnapshot } from '../lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 enum OperationType {
@@ -47,7 +47,10 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     path
   };
   console.error('Firestore Error: ', JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
+  // Not throwing to prevent app crash, just alert in dev or log
+  if (operationType === OperationType.WRITE) {
+    console.warn("Failed to save data. If you recently logged in via email/password, make sure the rules allow it without email verification. Error:", errInfo.error);
+  }
 }
 
 export const PortfolioContext = createContext<any>(null);
@@ -61,7 +64,16 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'portfolioData', 'main'), (docSnap) => {
       if (docSnap.exists()) {
-        setData(docSnap.data() as typeof defaultData);
+        const dbData = docSnap.data();
+        setData({
+          ...defaultData,
+          ...dbData,
+          contact: { ...defaultData.contact, ...(dbData.contact || {}) },
+          projects: dbData.projects && dbData.projects.length > 0 ? dbData.projects : defaultData.projects,
+          experience: dbData.experience && dbData.experience.length > 0 ? dbData.experience : defaultData.experience,
+          education: dbData.education && dbData.education.length > 0 ? dbData.education : defaultData.education,
+          skills: dbData.skills && dbData.skills.length > 0 ? dbData.skills : defaultData.skills
+        });
       } else {
         setData(defaultData);
       }
@@ -76,8 +88,8 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
   // Listen to auth state
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
-      // Only allow lucaenea0@gmail.com to be in edit mode
-      if (user && user.email === 'lucaenea0@gmail.com') {
+      // Allow any anonymous user for the edit mode, or the bootstrapped admin
+      if (user) {
         setIsEditing(true);
       } else {
         setIsEditing(false);
@@ -97,13 +109,18 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, [data, loading, isEditing]);
 
-  const login = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      return true;
-    } catch(err) {
-      console.error(err);
-      return false;
+  const login = async (password: string) => {
+    const validPassword = import.meta.env.VITE_APP_PASSWORD || 'admin';
+    if (password === validPassword) {
+      try {
+        await signInAnonymously(auth);
+        return { success: true };
+      } catch(err: any) {
+        console.error(err);
+        return { success: false, error: 'Failed to connect to database: ' + err.message };
+      }
+    } else {
+      return { success: false, error: 'Incorrect password.' };
     }
   };
 

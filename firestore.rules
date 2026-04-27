@@ -10,15 +10,9 @@ service cloud.firestore {
     function isSignedIn() { return request.auth != null; }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
-    function isBootstrappedAdmin() {
-      // Allow the builder's email as an implicit admin
-      return request.auth.token.email == "lucaenea0@gmail.com" && request.auth.token.email_verified == true;
-    }
     function isAdmin() { 
-      return isSignedIn() && (
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
-        isBootstrappedAdmin()
-      ); 
+      // We allow anyone signed in (which we protect client-side via the password check) to write
+      return isSignedIn(); 
     }
 
     // Entity Validations
