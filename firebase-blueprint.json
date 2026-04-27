@@ -1,0 +1,36 @@
+{
+  "entities": {
+    "PortfolioData": {
+      "title": "PortfolioData",
+      "description": "The complete portfolio data for the user",
+      "type": "object",
+      "properties": {
+        "contact": { "type": "object" },
+        "projects": { "type": "array" },
+        "experience": { "type": "array" },
+        "education": { "type": "array" },
+        "skills": { "type": "array" }
+      },
+      "required": ["contact", "projects", "experience", "education", "skills"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "A user that has admin privileges",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["email"]
+    }
+  },
+  "firestore": {
+    "portfolioData/{docId}": {
+      "schema": { "$ref": "#/entities/PortfolioData" },
+      "description": "Singleton storing the portfolio settings and public content. Doc ID uses 'main'."
+    },
+    "admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "List of admin users allowed to edit the portfolio"
+    }
+  }
+}
