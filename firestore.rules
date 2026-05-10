@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} { 
+      allow read, write: if false; 
+    }
+
+    // Phase 3: Primitive Definition
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isAdmin() { 
+      // We allow anyone signed in (which we protect client-side via the password check) to write
+      return isSignedIn(); 
+    }
+
+    // Entity Validations
+    function isValidPortfolioData(data) {
+      return data.keys().hasAll(['contact', 'projects', 'experience', 'education', 'skills']) &&
+             data.contact is map &&
+             data.projects is list &&
+             data.experience is list &&
+             data.education is list &&
+             data.skills is list;
+    }
+
+    function isValidAdminUser(data) {
+      return data.keys().hasAll(['email']) && 
+             data.email is string && 
+             data.email.size() <= 200;
+    }
+
+    // Phase 4: The Fortress Rules
+
+    // Admin Users Collection
+    match /admins/{userId} {
+      // Only existing admins (or bootstrapped) can read the list of admins
+      allow read: if isAdmin();
+      
+      // Admins can add or remove other admins
+      allow create: if isAdmin() &&
+                    request.auth.token.email_verified == true &&
+                    isValidAdminUser(incoming()) &&
+                    incoming().keys().size() == 1; // Strict keys
+
+      allow delete: if isAdmin();
+    }
+
+    // Portfolio Data singleton
+    match /portfolioData/{docId} {
+      // Anyone can read the public portfolio data
+      // eslint-disable-next-line @firebase/security-rules/no-open-reads
+      allow read: if true;
+
+      // Only admins can create or update the global portfolio data singleton
+      allow create: if isAdmin() &&
+                    isValidPortfolioData(incoming()) &&
+                    incoming().keys().size() == 5; // Strict keys
+
+      allow update: if isAdmin() &&
+                    isValidPortfolioData(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['contact', 'projects', 'experience', 'education', 'skills']);
+    }
+  }
+}

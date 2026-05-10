@@ -7,19 +7,19 @@ export default function Footer() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleAdminClick = () => {
+  const handleAdminClick = async () => {
     if (isEditing) {
-      logout();
+      await logout();
     } else {
       setShowLoginModal(true);
     }
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = login(password);
-    if (!success) {
-      setError('Incorrect password.');
+    const result = await login(password);
+    if (!result.success) {
+      setError(result.error);
     } else {
       setShowLoginModal(false);
       setPassword('');
