@@ -69,10 +69,18 @@ export function PortfolioProvider({ children }: { children: ReactNode }) {
           ...defaultData,
           ...dbData,
           contact: { ...defaultData.contact, ...(dbData.contact || {}) },
-          projects: dbData.projects && dbData.projects.length > 0 ? dbData.projects : defaultData.projects,
-          experience: dbData.experience && dbData.experience.length > 0 ? dbData.experience : defaultData.experience,
-          education: dbData.education && dbData.education.length > 0 ? dbData.education : defaultData.education,
-          skills: dbData.skills && dbData.skills.length > 0 ? dbData.skills : defaultData.skills
+          projects: dbData.projects && dbData.projects.length > 0 
+            ? dbData.projects.map((dbProj: any) => ({ ...(defaultData.projects.find(p => p.id === dbProj.id) || {}), ...dbProj }))
+            : defaultData.projects,
+          experience: dbData.experience && dbData.experience.length > 0 
+            ? dbData.experience.map((dbExp: any) => ({ ...(defaultData.experience.find(e => e.id === dbExp.id) || {}), ...dbExp }))
+            : defaultData.experience,
+          education: dbData.education && dbData.education.length > 0 
+            ? dbData.education.map((dbEdu: any) => ({ ...(defaultData.education.find(e => e.id === dbEdu.id) || {}), ...dbEdu }))
+            : defaultData.education,
+          skills: dbData.skills && dbData.skills.length > 0 
+            ? dbData.skills.map((dbSkill: any) => ({ ...(defaultData.skills.find(s => s.id === dbSkill.id) || {}), ...dbSkill }))
+            : defaultData.skills
         });
       } else {
         setData(defaultData);
