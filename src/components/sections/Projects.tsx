@@ -16,7 +16,7 @@ export default function Projects() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-stack-md">
         {data.projects.map((proj: any, idx: number) => (
-          <motion.article 
+          <motion.article
             key={proj.id}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -25,7 +25,7 @@ export default function Projects() {
             className={`flex flex-col group bg-surface/80 backdrop-blur-[12px] border ${isEditing ? 'border-primary' : 'border-white/5'} rounded-xl p-6 transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,163,255,0.08)] relative overflow-hidden`}
           >
             {!isEditing && <div className={`absolute inset-0 bg-gradient-to-br from-primary-container/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}></div>}
-            
+
             <div className="mb-stack-md relative z-10 w-full h-48 rounded-lg overflow-hidden border border-outline-variant/20 bg-surface-container">
               {proj.imageUrl ? (
                 <img src={proj.imageUrl} alt={proj.title} className="w-full h-full object-cover" />
@@ -54,35 +54,52 @@ export default function Projects() {
 
             <div className="flex-grow flex flex-col relative z-10">
               <div className={`flex justify-between items-center mb-stack-sm text-${proj.colorClass}`}>
-                <EditableText 
-                  value={proj.period} 
-                  onChange={(val: string) => updateItem('projects', proj.id, 'period', val)} 
+                <EditableText
+                  value={proj.period}
+                  onChange={(val: string) => updateItem('projects', proj.id, 'period', val)}
                   className={`font-label-caps tracking-widest uppercase text-${proj.colorClass}`}
                 />
-                <a href="#" className="text-on-surface-variant group-hover:text-current transition-colors">
-                  <span className="material-symbols-outlined text-[20px]">arrow_outward</span>
-                </a>
+                {isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Project URL..."
+                      value={proj.link || ''}
+                      onChange={e => updateItem('projects', proj.id, 'link', e.target.value)}
+                      className="bg-surface-container-highest text-on-surface border border-outline-variant rounded px-2 py-1 text-xs w-40"
+                    />
+                    <span className="material-symbols-outlined text-[20px] text-on-surface-variant">arrow_outward</span>
+                  </div>
+                ) : proj.link ? (
+                  <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-on-surface-variant group-hover:text-current transition-colors">
+                    <span className="material-symbols-outlined text-[20px]">arrow_outward</span>
+                  </a>
+                ) : (
+                  <span className="text-on-surface-variant/30">
+                    <span className="material-symbols-outlined text-[20px]">arrow_outward</span>
+                  </span>
+                )}
               </div>
-              <EditableText 
+              <EditableText
                 as="h3"
-                value={proj.title} 
-                onChange={(val: string) => updateItem('projects', proj.id, 'title', val)} 
+                value={proj.title}
+                onChange={(val: string) => updateItem('projects', proj.id, 'title', val)}
                 className={`font-h3 text-h3 text-on-surface mb-stack-sm group-hover:text-${proj.colorClass}-fixed transition-colors font-bold`}
               />
-              <EditableText 
+              <EditableText
                 multiline
                 as="p"
-                value={proj.description} 
-                onChange={(val: string) => updateItem('projects', proj.id, 'description', val)} 
+                value={proj.description}
+                onChange={(val: string) => updateItem('projects', proj.id, 'description', val)}
                 className="font-body-md text-on-surface-variant mb-stack-md block"
               />
-              
+
               {isEditing ? (
                 <div className="mt-auto pt-stack-sm border-t border-outline-variant/20">
                   <label className="text-xs font-label-caps text-on-surface-variant mb-1 block">Tags (comma-separated)</label>
-                  <EditableText 
-                    value={proj.tags} 
-                    onChange={(val: string) => updateItem('projects', proj.id, 'tags', val)} 
+                  <EditableText
+                    value={proj.tags}
+                    onChange={(val: string) => updateItem('projects', proj.id, 'tags', val)}
                     className="font-code text-sm"
                   />
                 </div>

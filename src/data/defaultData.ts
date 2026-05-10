@@ -14,7 +14,8 @@ export const defaultData = {
       description: 'A comprehensive web application designed to validate product hypotheses leveraging the Claude API for deep market analysis and logical inference.',
       tags: 'React, Node.js, Claude API, MongoDB, Tailwind, Figma',
       colorClass: 'primary',
-      imageUrl: ''
+      imageUrl: '',
+      link: 'https://ai-product-validator-drab.vercel.app/'
     },
     {
       id: '2',
@@ -23,7 +24,8 @@ export const defaultData = {
       description: 'Intelligent platform integrating the Gemini API to dynamically generate personalized, constraint-optimized travel itineraries based on natural language input.',
       tags: 'React, Firebase, Gemini API, MongoDB, Tailwind',
       colorClass: 'secondary',
-      imageUrl: ''
+      imageUrl: '',
+      link: 'https://aitraveler.vercel.app/'
     },
     {
       id: '3',
@@ -32,7 +34,8 @@ export const defaultData = {
       description: 'A scalable full-stack application featuring complex state management for dynamic catalogs, secure cart processing, and a robust microservices backend.',
       tags: 'React, Node.js, Express, MongoDB, Tailwind',
       colorClass: 'outline',
-      imageUrl: ''
+      imageUrl: '',
+      link: ''
     }
   ],
   experience: [
